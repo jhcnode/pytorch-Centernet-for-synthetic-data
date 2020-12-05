@@ -85,7 +85,7 @@ class opts(object):
 		help='main metric to save best model')
 		self.parser.add_argument('--vis_thresh', type=float, default=0.3,
 		help='visualization threshold.')
-		self.parser.add_argument('--debugger_theme', default='white', 
+		self.parser.add_argument('--debugger_theme', default=None, 
 		choices=['white', 'black'])
 		
 		# input

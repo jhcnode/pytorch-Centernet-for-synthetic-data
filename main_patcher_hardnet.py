@@ -20,17 +20,18 @@ def train(trainer,train_loader,logger,optimizer,model,start_epoch,opt):
 
 		log_dict_train, _ = trainer.train(epoch, train_loader)
 		logger.write('epoch: {} |'.format(epoch))
-		logger.write('train loss {:8f} | '.format(log_dict_train['loss']))
+		logger.write('{}\n'.format(log_dict_train))
+
 			
 		save_model(os.path.join(opt.save_dir, 'model_last.pth'),epoch, model, optimizer)
 		if epoch in opt.lr_step:
-			save_model(os.path.join(opt.save_dir, 'model_{}.pth'.format(epoch)), 
+			save_model(os.path.join(opt.save_dir, 'model_ }.pth'.format(epoch)), 
 					 epoch, model, optimizer)
 			lr = opt.lr * (0.1 ** (opt.lr_step.index(epoch) + 1))
 			print('Drop LR to', lr)
 			for param_group in optimizer.param_groups:
 				param_group['lr'] = lr	
-				
+	logger.close()					
 def test_debug(trainer,test_loader,start_epoch,opt):
 	for epoch in range(start_epoch + 1, opt.num_epochs + 1):
 		mark = epoch if opt.save_all else 'last'
@@ -46,7 +47,10 @@ def main(opt):
 	Dataset.default_resolution=[512,512]
 	back_label,patch_label,negative_label,class_name=read_patch(opt.data_dir)
 	Dataset.num_classes=len(class_name)
-	opt.lr_step=[120,150,180,210,240,250,280,310,320,350,370,400,430,460,490,600,700,800,900]
+	opt.lr=1e-2
+	opt.batch_size=48
+	opt.subdivision=1
+	opt.lr_step=[230,280,310,320,350,370,400,430,460,490,600,700,800,900]
 	opt = opts().update_dataset_info_and_set_heads(opt, Dataset)	
 	logger = Logger(opt)	
 	write_map(logger=logger,class_name=class_name)
@@ -92,18 +96,15 @@ def main(opt):
 	else:
 		max_acc_epoch=-1
 		max_acc=0
-		
+
 	if(opt.debug>0):
 		test_debug(trainer=trainer,test_loader=train_loader,start_epoch=start_epoch,opt=opt)
 	else:
 		train(trainer=trainer,train_loader=train_loader,logger=logger,optimizer=optimizer,model=model,start_epoch=start_epoch,opt=opt)
-		
-		
-	logger.close()	
 
 
 if __name__ == '__main__':
   opt = opts().parse()
-  opt.save_dir="F:/exp/ctdetp/default/"
-  opt.load_model="F:/exp/ctdetp/default/model_last.pth"  
+  # opt.save_dir="F:/exp/ctdetp/default/"
+  # opt.load_model="F:/exp/ctdetp/default/model_last.pth"  
   main(opt)

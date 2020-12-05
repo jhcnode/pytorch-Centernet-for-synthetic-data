@@ -169,7 +169,7 @@ class CenternetDetPatchSampler(data.Dataset):
 
         return offset_x, offset_y
 
-    def pacth_to_data(self, max_objs=5):
+    def patch_to_data(self, max_objs=5):
         choice_background = np.random.choice(self.back_labels, 1)[0]
         choice_patch_ids = np.random.choice(list(range(0, len(self.patch_labels))), max_objs)
         patch_dict = {}
@@ -327,7 +327,7 @@ class CenternetDetPatchSampler(data.Dataset):
        # end = time.time()
         if np.random.random() < 0.5 or self.negative_labels is None:
             while ((len(anns) > 0 and img is not None) != True):
-                img, anns = self.pacth_to_data(max_objs=num_objs)
+                img, anns = self.patch_to_data(max_objs=num_objs)
         else:
             img = self.negative_sampling()
 
@@ -454,5 +454,5 @@ class CenternetDetPatchSampler(data.Dataset):
                 np.zeros((1, 6), dtype=np.float32)
             meta = {'c': c, 's': s, 'gt_det': gt_det}
             ret['meta'] = meta
-
+      
         return ret

@@ -131,7 +131,8 @@ def create_inferece_model():
 	opt = opts()
 	args = opt.parser.parse_args()
 	args.model_name="centernet"
-	args.backbone="dla34"
+	# args.backbone="hardnet85"
+	args.backbone="dla34"	
 	args.task='ctdetp'
 	args.mean= [0, 0, 0]
 	args.std=[1, 1, 1]
@@ -145,7 +146,10 @@ def create_inferece_model():
 	Dataset.default_resolution=[512,512]
 	Dataset.num_classes=num_classes	
 	args = opt.update_dataset_info_and_set_heads(args, Dataset)	
-	args.load_model=os.path.join(path,'model_last.pth')
+	# args.load_model=os.path.join(path,'hardnet.pth')	
+	args.load_model=os.path.join(path,'model_last.pth') #aug eval best 
+	# args.load_model=os.path.join(path,'model_1000.pth')	# aug
+	# args.load_model=os.path.join(path,'model_400.pth')	#not aug 	
 	opt=args
 	os.environ['CUDA_VISIBLE_DEVICES'] = opt.gpus_str
 	Detector = detector_factory[opt.task]

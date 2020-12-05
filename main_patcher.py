@@ -1,7 +1,3 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import _init_paths
 
 import os
@@ -10,7 +6,6 @@ import torch
 import torch.utils.data
 from opts import opts
 from models.model import create_model, load_model, save_model
-from models.data_parallel import DataParallel
 from logger import Logger
 from datasets.dataset_factory import get_dataset,read_patch,write_map
 from trains.train_factory import train_factory
@@ -22,16 +17,10 @@ import copy
 def train(trainer,train_loader,logger,optimizer,model,start_epoch,opt):
 	for epoch in range(start_epoch + 1, opt.num_epochs + 1):
 		mark = epoch if opt.save_all else 'last'
+
 		log_dict_train, _ = trainer.train(epoch, train_loader)
 		logger.write('epoch: {} |'.format(epoch))
-		logger.write('train loss {:8f} | '.format(log_dict_train['loss']))	
-		# log_dict_valid, _ = trainer.test(epoch, test_loader)
-		
-
-		# if(max_acc < log_dict_valid['mAP']):
-			# max_acc_epoch=epoch
-			# max_acc=log_dict_valid['mAP']
-			# save_model(max_acc_epoch_dir,epoch, model, optimizer,max_acc)	
+		logger.write('train loss {:8f} | '.format(log_dict_train['loss']))
 			
 		save_model(os.path.join(opt.save_dir, 'model_last.pth'),epoch, model, optimizer)
 		if epoch in opt.lr_step:
@@ -41,7 +30,7 @@ def train(trainer,train_loader,logger,optimizer,model,start_epoch,opt):
 			print('Drop LR to', lr)
 			for param_group in optimizer.param_groups:
 				param_group['lr'] = lr	
-				
+	logger.close()				
 def test_debug(trainer,test_loader,start_epoch,opt):
 	for epoch in range(start_epoch + 1, opt.num_epochs + 1):
 		mark = epoch if opt.save_all else 'last'
@@ -50,7 +39,7 @@ def test_debug(trainer,test_loader,start_epoch,opt):
 
 
 
-def main(opt):
+def main(opt):	
 	torch.manual_seed(opt.seed)
 	torch.backends.cudnn.benchmark = not opt.not_cuda_benchmark and not opt.test
 	Dataset = get_dataset(opt.dataset, opt.task)
@@ -89,17 +78,8 @@ def main(opt):
 	num_workers=opt.num_workers,
 	pin_memory=True,
 	drop_last=True
-	)	
-	test_opt=copy.deepcopy(opt)
-	test_opt.phase="test"
-	test_set=Dataset(test_opt,patch_label,back_label,class_name,negative_labels=negative_label)
-	test_loader = torch.utils.data.DataLoader(
-	test_set, 
-	batch_size=1, 
-	shuffle=False,
-	num_workers=1,
-	pin_memory=True
-	)	
+	)
+
 
 	print('Starting training...')
 	max_acc_epoch_dir=os.path.join(opt.save_dir, 'model_max_acc.pth')
@@ -112,7 +92,7 @@ def main(opt):
 		max_acc=0
 		
 	if(opt.debug>0):
-		test_debug(trainer=trainer,test_loader=test_loader,start_epoch=start_epoch,opt=opt)
+		test_debug(trainer=trainer,test_loader=train_loader,start_epoch=start_epoch,opt=opt)
 	else:
 		train(trainer=trainer,train_loader=train_loader,logger=logger,optimizer=optimizer,model=model,start_epoch=start_epoch,opt=opt)
 		
@@ -122,4 +102,7 @@ def main(opt):
 
 if __name__ == '__main__':
   opt = opts().parse()
+  opt.phase="test"
+  # opt.save_dir="F:/exp/ctdetp/default/"
+  # opt.load_model="F:/exp/ctdetp/default/model_last.pth"  
   main(opt)

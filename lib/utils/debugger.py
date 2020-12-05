@@ -17,6 +17,7 @@ class Debugger(object):
       self.plt = plt
     self.imgs = {}
     self.theme = theme
+
     colors = [(color_list[_]).astype(np.uint8) \
             for _ in range(len(color_list))]
     self.colors = np.array(colors, dtype=np.uint8).reshape(len(colors), 1, 1, 3)
@@ -172,27 +173,34 @@ class Debugger(object):
       cv2.circle(self.imgs[img_id], (rect1[0], rect2[1]), int(10 * conf), c, 1)
       cv2.circle(self.imgs[img_id], (rect2[0], rect1[1]), int(10 * conf), c, 1)
 
-  def add_coco_bbox(self, bbox, cat, conf=1, show_txt=True, img_id='default'): 
-    bbox = np.array(bbox, dtype=np.int32)
+  def add_coco_bbox(self, bbox, cat, conf=1, show_txt=True, img_id='default'):
+    if(self.names[cat] in super_category):
+        bbox = np.array(bbox, dtype=np.int32)
     # cat = (int(cat) + 1) % 80
-    cat = int(cat)
+        cat = int(cat)
     # print('cat', cat, self.names[cat])
-    c = self.colors[cat][0][0].tolist()
-    if self.theme == 'white':
-      c = (255 - np.array(c)).tolist()
-    txt = '{}({}):{:.1f}'.format(self.names[cat],super_category[self.names[cat]], conf)
+        c = self.colors[cat][0][0].tolist()
+        if self.theme == 'white':
+          c = (255 - np.array(c)).tolist()
+        txt = '{}({}):{:.1f}'.format(self.names[cat],super_category[self.names[cat]], conf)
 
-    font = cv2.FONT_HERSHEY_SIMPLEX
-    cat_size = cv2.getTextSize(txt, font, 0.5, 2)[0]
-    cv2.rectangle(
-      self.imgs[img_id], (bbox[0], bbox[1]), (bbox[2], bbox[3]), c, 2)
-    if show_txt:
-      img_cpy = self.imgs[img_id].copy()
-      cv2.rectangle(self.imgs[img_id],
-                    (bbox[0], bbox[3] + cat_size[1] + 2),
-                    (bbox[0] + cat_size[0], bbox[3] + 2), c, -1)					
-      cv2.putText(self.imgs[img_id], txt, (bbox[0], bbox[3] + 2+cat_size[1]), 
-                  font, 0.5, (0, 0, 0), thickness=1, lineType=cv2.LINE_AA)
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        cat_size = cv2.getTextSize(txt, font, 0.5, 2)[0]
+        cv2.rectangle(
+          self.imgs[img_id], (bbox[0], bbox[1]), (bbox[2], bbox[3]), c, 2)
+        if show_txt:
+          img_cpy = self.imgs[img_id].copy()
+      # cv2.rectangle(self.imgs[img_id],
+                    # (bbox[0], bbox[3] + cat_size[1] + 2),
+                    # (bbox[0] + cat_size[0], bbox[3] + 2), c, -1)					
+      # cv2.putText(self.imgs[img_id], txt, (bbox[0], bbox[3] + 2+cat_size[1]), 
+                  # font, 0.5, (0, 0, 0), thickness=1, lineType=cv2.LINE_AA)
+          cv2.rectangle(self.imgs[img_id],
+          (bbox[0], bbox[1] - cat_size[1] - 2),
+          (bbox[0] + cat_size[0], bbox[1] - 2), c, -1)
+          cv2.putText(self.imgs[img_id], txt, (bbox[0], bbox[1] - 2), 
+          font, 0.5, (0, 0, 0), thickness=1, lineType=cv2.LINE_AA)
+	
       # self.imgs[img_id] = cv2.addWeighted(self.imgs[img_id], 0.45, img_cpy, 0.55, 1)				  
 
   def add_coco_hp(self, points, img_id='default'): 
@@ -485,11 +493,28 @@ coco_class_name = [
 # 'KAERI_vinyl_gloves':'비닐류',
 # 'KAERI_working_shoes':'신발류'
 # }
+# super_category={
+# 'KAERI_bandage':'FB',
+# 'KAERI_brush':'WD',
+# 'KAERI_clothes':'FB',
+# 'KAERI_cotton':'FB',
+# 'KAERI_decontamination_paper':'PA',
+# 'KAERI_filter':'PL',
+# 'KAERI_hose':'RB',
+# 'KAERI_knife':'WD',
+# 'KAERI_mask':'FB',
+# 'KAERI_ranch_glove':'FB',
+# 'KAERI_rubber_glove':'RB',
+# 'KAERI_sandpaper':'PA',
+# 'KAERI_shoes':'RB',
+# 'KAERI_shoe_net':'VL',
+# 'KAERI_slippers':'RB',
+# 'KAERI_styrofoam':'PL',
+# 'KAERI_tissue':'PA',
+# 'KAERI_vinyl_gloves':'VL',
+# 'KAERI_working_shoes':'SH'
+# }
 super_category={
-'KAERI_bandage':'FB',
-'KAERI_brush':'WD',
-'KAERI_clothes':'FB',
-'KAERI_cotton':'FB',
 'KAERI_decontamination_paper':'PA',
 'KAERI_filter':'PL',
 'KAERI_hose':'RB',
@@ -500,96 +525,35 @@ super_category={
 'KAERI_sandpaper':'PA',
 'KAERI_shoes':'RB',
 'KAERI_shoe_net':'VL',
-'KAERI_slippers':'RB',
-'KAERI_styrofoam':'PL',
 'KAERI_tissue':'PA',
-'KAERI_vinyl_gloves':'VL',
 'KAERI_working_shoes':'SH'
 }
 
 
 color_list = np.array(
-        [
-            1.000, 1.000, 1.000,
-            0.850, 0.325, 0.098,
-            0.929, 0.694, 0.125,
-            0.494, 0.184, 0.556,
-            0.466, 0.674, 0.188,
-            0.301, 0.745, 0.933,
-            0.635, 0.078, 0.184,
-            0.300, 0.300, 0.300,
-            0.600, 0.600, 0.600,
-            1.000, 0.000, 0.000,
-            1.000, 0.500, 0.000,
-            0.749, 0.749, 0.000,
-            0.000, 1.000, 0.000,
-            0.000, 0.000, 1.000,
-            0.667, 0.000, 1.000,
-            0.333, 0.333, 0.000,
-            0.333, 0.667, 0.000,
-            0.333, 1.000, 0.000,
-            0.667, 0.333, 0.000,
-            0.667, 0.667, 0.000,
-            0.667, 1.000, 0.000,
-            1.000, 0.333, 0.000,
-            1.000, 0.667, 0.000,
-            1.000, 1.000, 0.000,
-            0.000, 0.333, 0.500,
-            0.000, 0.667, 0.500,
-            0.000, 1.000, 0.500,
-            0.333, 0.000, 0.500,
-            0.333, 0.333, 0.500,
-            0.333, 0.667, 0.500,
-            0.333, 1.000, 0.500,
-            0.667, 0.000, 0.500,
-            0.667, 0.333, 0.500,
-            0.667, 0.667, 0.500,
-            0.667, 1.000, 0.500,
-            1.000, 0.000, 0.500,
-            1.000, 0.333, 0.500,
-            1.000, 0.667, 0.500,
-            1.000, 1.000, 0.500,
-            0.000, 0.333, 1.000,
-            0.000, 0.667, 1.000,
-            0.000, 1.000, 1.000,
-            0.333, 0.000, 1.000,
-            0.333, 0.333, 1.000,
-            0.333, 0.667, 1.000,
-            0.333, 1.000, 1.000,
-            0.667, 0.000, 1.000,
-            0.667, 0.333, 1.000,
-            0.667, 0.667, 1.000,
-            0.667, 1.000, 1.000,
-            1.000, 0.000, 1.000,
-            1.000, 0.333, 1.000,
-            1.000, 0.667, 1.000,
-            0.167, 0.000, 0.000,
-            0.333, 0.000, 0.000,
-            0.500, 0.000, 0.000,
-            0.667, 0.000, 0.000,
-            0.833, 0.000, 0.000,
-            1.000, 0.000, 0.000,
-            0.000, 0.167, 0.000,
-            0.000, 0.333, 0.000,
-            0.000, 0.500, 0.000,
-            0.000, 0.667, 0.000,
-            0.000, 0.833, 0.000,
-            0.000, 1.000, 0.000,
-            0.000, 0.000, 0.167,
-            0.000, 0.000, 0.333,
-            0.000, 0.000, 0.500,
-            0.000, 0.000, 0.667,
-            0.000, 0.000, 0.833,
-            0.000, 0.000, 1.000,
-            0.000, 0.000, 0.000,
-            0.143, 0.143, 0.143,
-            0.286, 0.286, 0.286,
-            0.429, 0.429, 0.429,
-            0.571, 0.571, 0.571,
-            0.714, 0.714, 0.714,
-            0.857, 0.857, 0.857,
-            0.000, 0.447, 0.741,
-            0.50, 0.5, 0
-        ]
-    ).astype(np.float32)
-color_list = color_list.reshape((-1, 3)) * 255
+	[
+	230,25,75,
+	60,180,75,
+	255,225,25,
+	0,130,200,
+	245,130,48,
+	145,30,180,
+	70,240,240,
+	240,50,230,
+	210,245,60,
+	250,190,212,
+	0,128,128,
+	220,190,255,
+	170,110,40,
+	255,250,200,
+	128,128,128,
+	170,255,195,
+	128,128,0,
+	255,215,180,
+	0,0,128,
+	128,0,0,
+	255,255,255,
+	0,0,0
+	]
+	).astype(np.float32)
+color_list = color_list.reshape((-1, 3))

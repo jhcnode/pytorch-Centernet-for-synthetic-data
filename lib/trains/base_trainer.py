@@ -111,9 +111,10 @@ class BaseTrainer(object):
 				if phase == 'train':
 					loss.backward()
 				else:
-					test_stats=self._get_result(batch,output)
-					for l in batch_eval_stats:
-						batch_eval_stats[l] +=test_stats[l]/subdivision
+					pass
+					# test_stats=self._get_result(batch,output)
+					# for l in batch_eval_stats:
+						# batch_eval_stats[l] +=test_stats[l]/subdivision
 
 						
 				if opt.debug > 1 and  phase == 'test' :
