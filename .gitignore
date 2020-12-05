@@ -1,0 +1,6 @@
+*.pth
+__pycache__/
+lib/exp/
+data/
+export/
+test_data/
