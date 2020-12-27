@@ -1,5 +1,5 @@
 # pytorch-Centernet-for-synthetic-data
-Centernet training on synthetic data(combine objects with background)
+Centernet training using synthetic data(combine objects with background)
 
 
 # 1. train
