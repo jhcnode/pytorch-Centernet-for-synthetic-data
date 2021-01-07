@@ -8,4 +8,4 @@ python main_patcher.py  --model_name="centernet" --backbone="dla34" --task="ctde
 
 # 2. demo
 
- 
+ python demo.py
